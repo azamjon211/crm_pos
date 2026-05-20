@@ -414,6 +414,50 @@
         font-size: 10.5px; color: #6b7a8f;
         font-family: inherit;
     }
+
+    /* ─── POS mobile tabs ──────────────────────────────────── */
+    .pos-mobile-tabs { display: none; }
+
+    @media (max-width: 767px) {
+        .pos-mobile-tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e4eaf2;
+            flex-shrink: 0;
+        }
+        .pos-mobile-tab {
+            flex: 1; padding: 11px 8px;
+            border: none; background: none;
+            font-size: 13px; font-weight: 600;
+            color: #6b7a8f; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all .15s;
+        }
+        .pos-mobile-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+        .pos-mobile-tab .tab-badge {
+            background: #ef4444; color: #fff;
+            border-radius: 10px; font-size: 10px; font-weight: 700;
+            padding: 1px 5px; min-width: 16px; text-align: center;
+        }
+
+        .pos-root { height: calc(100vh - 60px - 47px); }
+
+        .pos-cart {
+            width: 100% !important;
+            min-width: unset !important;
+            max-width: unset !important;
+            border-right: none;
+        }
+        .pos-cart.tab-hidden, .pos-browser.tab-hidden { display: none; }
+
+        /* Smaller checkout button on mobile */
+        .btn-complete { padding: 12px; font-size: 15px; }
+
+        /* Hide keyboard hint on mobile */
+        .f2-hint { display: none; }
+    }
 </style>
 
 @if(session('low_stock_warning'))
@@ -431,10 +475,20 @@
 </div>
 @endif
 
+<div class="pos-mobile-tabs" id="posMobileTabs">
+    <button class="pos-mobile-tab" data-target="browser" id="tabBrowser">
+        <i class="bi bi-grid-fill"></i> Mahsulotlar
+    </button>
+    <button class="pos-mobile-tab active" data-target="cart" id="tabCart">
+        <i class="bi bi-cart-fill"></i> Savat
+        <span class="tab-badge" id="mobileCartBadge" style="display:none">0</span>
+    </button>
+</div>
+
 <div class="pos-root">
 
     {{-- ═══════════ LEFT: CART ═══════════ --}}
-    <div class="pos-cart">
+    <div class="pos-cart" id="posCart">
 
         {{-- Cart tabs --}}
         <div class="cart-header">
@@ -538,7 +592,7 @@
     </div>
 
     {{-- ═══════════ RIGHT: BROWSER ═══════════ --}}
-    <div class="pos-browser">
+    <div class="pos-browser" id="posBrowser">
 
         {{-- Search --}}
         <div class="browser-search">
@@ -652,6 +706,7 @@
                     </div>
                 </td></tr>`;
             updateTotal();
+            updateMobileCartBadge();
             return;
         }
 
@@ -687,6 +742,15 @@
         `).join('');
 
         updateTotal();
+        updateMobileCartBadge();
+    }
+
+    function updateMobileCartBadge() {
+        const badge = document.getElementById('mobileCartBadge');
+        if (!badge) return;
+        const count = cartItems.length;
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
     }
 
     function onQtyChange(input) {
@@ -1007,6 +1071,25 @@
     document.addEventListener('keydown', e => {
         if (e.key === 'F2') { e.preventDefault(); searchInput.select(); searchInput.focus(); }
     });
+
+    /* ── Mobile tab switching ───────────────────────────────── */
+
+    (function() {
+        const posCart    = document.getElementById('posCart');
+        const posBrowser = document.getElementById('posBrowser');
+        const tabs       = document.querySelectorAll('.pos-mobile-tab');
+
+        function switchTab(target) {
+            tabs.forEach(t => t.classList.toggle('active', t.dataset.target === target));
+            posCart.classList.toggle('tab-hidden',    target !== 'cart');
+            posBrowser.classList.toggle('tab-hidden', target !== 'browser');
+        }
+
+        tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.target)));
+
+        // Default: show browser on mobile, cart on desktop
+        if (window.innerWidth < 768) switchTab('browser');
+    })();
 
     /* ── Init ───────────────────────────────────────────────── */
 

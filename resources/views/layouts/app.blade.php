@@ -318,12 +318,68 @@
         .pagination .page-item.active .page-link {
             background: #6366f1; border-color: #6366f1;
         }
+
+        /* ─── Mobile sidebar toggle ──────────────────────────────────── */
+        .btn-hamburger {
+            display: none;
+            background: none; border: none;
+            padding: 6px 8px; margin-right: 2px;
+            font-size: 22px; line-height: 1;
+            color: var(--text-main); cursor: pointer;
+            border-radius: 8px; flex-shrink: 0;
+        }
+        .btn-hamburger:hover { background: #f1f5f9; }
+
+        .sb-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(12,26,46,.5);
+            z-index: 199;
+        }
+        .sb-overlay.open { display: block; }
+
+        /* ─── Responsive breakpoint ──────────────────────────────────── */
+        @media (max-width: 767px) {
+            .btn-hamburger { display: flex; align-items: center; justify-content: center; }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform .25s cubic-bezier(.4,0,.2,1);
+                z-index: 300;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 8px 0 32px rgba(0,0,0,.2);
+            }
+
+            .main-wrap {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            .topbar { padding: 0 12px; gap: 8px; }
+            .topbar-title { font-size: 14px; }
+
+            .page-body { padding: 14px; }
+
+            /* Tables: horizontal scroll on mobile */
+            .card div[style*="overflow:hidden"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+            .table { font-size: 12.5px; }
+            .table thead th { font-size: 10px; padding: 9px 10px; }
+            .table td { padding: 10px 10px; }
+
+            /* KPI value smaller on mobile */
+            .kpi-val { font-size: 22px; }
+            .kpi { padding: 18px 16px; }
+        }
     </style>
 </head>
 <body>
 
+    <div class="sb-overlay" id="sbOverlay"></div>
+
     {{-- Sidebar --}}
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="sb-logo">
             <div class="sb-logo-icon"><i class="bi bi-shop-window"></i></div>
             <div>
@@ -431,6 +487,9 @@
     {{-- Main --}}
     <div class="main-wrap">
         <div class="topbar">
+            <button class="btn-hamburger" id="btnHamburger" aria-label="Menu">
+                <i class="bi bi-list"></i>
+            </button>
             <div>
                 <div class="topbar-title">@yield('page_title', 'Dashboard')</div>
                 @hasSection('breadcrumb')
@@ -479,6 +538,24 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sbOverlay');
+    const hamburger = document.getElementById('btnHamburger');
+    if (!sidebar || !overlay || !hamburger) return;
+
+    function open()  { sidebar.classList.add('open');    overlay.classList.add('open'); }
+    function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
+    hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? close() : open());
+    overlay.addEventListener('click', close);
+
+    document.querySelectorAll('.sb-link').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth < 768) close(); });
+    });
+})();
+</script>
 @yield('scripts')
 </body>
 </html>
