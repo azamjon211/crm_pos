@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\DebtPayment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Services\DailyClosingService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -20,10 +22,13 @@ class DashboardController extends Controller
 
         $todayCount = Sale::whereDate('created_at', today())->count();
 
+        $paidDebtSaleIds = DebtPayment::groupBy('sale_id')
+            ->havingRaw('SUM(amount) >= MIN(sales.total_amount)')
+            ->join('sales', 'debt_payments.sale_id', '=', 'sales.id')
+            ->pluck('debt_payments.sale_id');
+
         $activeDebts = Sale::where('payment_type', Sale::PAYMENT_DEBT)
-            ->whereRaw(
-                '(SELECT COALESCE(SUM(amount), 0) FROM debt_payments WHERE sale_id = sales.id) < total_amount'
-            )
+            ->when($paidDebtSaleIds->isNotEmpty(), fn($q) => $q->whereNotIn('id', $paidDebtSaleIds))
             ->selectRaw('COUNT(*) as cnt, COALESCE(SUM(total_amount), 0) as total')
             ->first();
 

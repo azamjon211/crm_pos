@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
 
 export default defineConfig({
     plugins: [
@@ -10,6 +11,12 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            '~bootstrap': resolve(__dirname, 'node_modules/bootstrap'),
+            '~bootstrap-icons': resolve(__dirname, 'node_modules/bootstrap-icons'),
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],
