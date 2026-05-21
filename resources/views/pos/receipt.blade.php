@@ -197,12 +197,6 @@
 
     {{-- ── HEADER ── --}}
     <div class="r-shop-name">{{ $shop->name ?? config('app.name') }}</div>
-    @if($shop?->address)
-        <div class="r-shop-sub">{{ $shop->address }}</div>
-    @endif
-    @if($shop?->phone)
-        <div class="r-shop-sub">Tel: {{ $shop->phone }}</div>
-    @endif
 
     <hr class="r-div-solid">
 
