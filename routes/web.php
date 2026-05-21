@@ -42,6 +42,7 @@ Route::middleware(['auth', 'set.shop', 'role:superadmin,admin,manager'])
         Route::get('sales/{sale}/return', [Backend\SaleController::class, 'returnForm'])->name('sales.return');
         Route::post('sales/{sale}/return', [Backend\SaleController::class, 'processReturn'])->name('sales.process-return');
         Route::get('debts', [Backend\DebtController::class, 'index'])->name('debts.index');
+        Route::get('debts/customers/{customer}', [Backend\DebtController::class, 'customer'])->name('debts.customer');
         Route::get('debts/{sale}', [Backend\DebtController::class, 'show'])->name('debts.show');
         Route::post('debts/{sale}/pay', [Backend\DebtController::class, 'pay'])->name('debts.pay');
         Route::get('daily-closing', [Backend\DailyClosingController::class, 'index'])->name('daily-closing.index');
