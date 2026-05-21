@@ -395,14 +395,28 @@
     .prod-count { font-size: 11.5px; color: #b0bec5; text-align: center; padding: 6px 0 4px; }
 
     /* qty input in cart */
+    .qty-wrap { display: inline-flex; align-items: center; gap: 3px; }
+    .qty-btn {
+        width: 26px; height: 28px;
+        border: 1.5px solid #e4eaf2; border-radius: 6px;
+        background: #f8fafc; color: #6b7a8f;
+        font-size: 16px; font-weight: 700;
+        cursor: pointer; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+        transition: all .15s; flex-shrink: 0; padding: 0;
+    }
+    .qty-btn:hover { background: #6366f1; border-color: #6366f1; color: #fff; }
     .qty-input {
-        width: 72px; border: 1.5px solid #e4eaf2; border-radius: 7px;
-        padding: 4px 8px; font-size: 13px; font-weight: 600;
+        width: 54px; border: 1.5px solid #e4eaf2; border-radius: 7px;
+        padding: 4px 4px; font-size: 13px; font-weight: 600;
         text-align: center; outline: none;
         transition: border-color .15s;
         font-family: inherit;
     }
     .qty-input:focus { border-color: #6366f1; }
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .qty-input[type=number] { -moz-appearance: textfield; }
 
     /* F2 hint */
     .f2-hint {
@@ -718,12 +732,16 @@
                     <div style="font-size:11.5px;color:#94a3b8">${fmt(item.unit_price)} so'm/dona</div>
                 </td>
                 <td style="text-align:center">
-                    <input type="number" name="items[${i}][quantity]"
-                           value="${item.quantity}"
-                           class="qty-input"
-                           step="0.01" min="0.01"
-                           data-index="${i}" data-price="${item.unit_price}"
-                           oninput="onQtyChange(this)">
+                    <div class="qty-wrap">
+                        <button type="button" class="qty-btn" onclick="changeQty(${i}, -1)">−</button>
+                        <input type="number" name="items[${i}][quantity]"
+                               value="${item.quantity}"
+                               class="qty-input"
+                               step="any"
+                               data-index="${i}" data-price="${item.unit_price}"
+                               oninput="onQtyChange(this)">
+                        <button type="button" class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
+                    </div>
                 </td>
                 <td style="text-align:right;font-weight:700;font-size:13.5px;color:#1a2535" id="line-${i}">
                     ${fmt(item.unit_price * item.quantity)}
@@ -753,10 +771,24 @@
         badge.style.display = count > 0 ? 'inline-block' : 'none';
     }
 
+    function changeQty(i, delta) {
+        const input = document.querySelector(`[name="items[${i}][quantity]"]`);
+        const price = parseFloat(input.dataset.price);
+        const current = parseFloat(input.value) || 1;
+        const next = current + delta;
+        if (next <= 0) return;
+        input.value = next;
+        cartItems[i].quantity = next;
+        const el = document.getElementById(`line-${i}`);
+        if (el) el.textContent = fmt(price * next);
+        updateTotal();
+    }
+
     function onQtyChange(input) {
         const i     = parseInt(input.dataset.index);
         const price = parseFloat(input.dataset.price);
-        const qty   = parseFloat(input.value) || 0;
+        let qty     = parseFloat(input.value.replace(',', '.')) || 0;
+        if (qty <= 0) return;
         cartItems[i].quantity = qty;
         const el = document.getElementById(`line-${i}`);
         if (el) el.textContent = fmt(price * qty);

@@ -15,8 +15,6 @@ class ProductController extends Controller
     public function index(Request $request): View
     {
         $query = Product::with('category');
-        //dd($request->input('search'));
-
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'ilike', "%{$search}%")

@@ -23,11 +23,11 @@ class SaleReturn extends Model
         'quantity',
         'reason',
         'return_type',
-        'return_at'
+        'returned_at'
     ];
     protected $casts = [
         'quantity' => 'decimal:2',
-        'return_at' => 'datetime'
+        'returned_at' => 'datetime'
     ];
     public function shop(){
         return $this->belongsTo(Shop::class);

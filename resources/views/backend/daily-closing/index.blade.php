@@ -16,7 +16,15 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h6>Qaytarishlar</h6>
+                    <h4>{{ number_format($todayStats['totalReturns'], 0, '.', ' ') }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card {{ $todayStats['profit'] >= 0 ? 'bg-success' : 'bg-danger' }} text-white">
                 <div class="card-body">
                     <h6>Foyda</h6>
                     <h4>{{ number_format($todayStats['profit'], 0, '.', ' ') }}</h4>
@@ -37,14 +45,25 @@
     </form>
 
     <table class="table table-bordered">
-        <thead><tr><th>Sana</th><th>Savdo</th><th>Tannarx</th><th>Foyda</th></tr></thead>
+        <thead>
+            <tr>
+                <th>Sana</th>
+                <th>Savdo</th>
+                <th>Qaytarishlar</th>
+                <th>Tannarx</th>
+                <th>Foyda</th>
+            </tr>
+        </thead>
         <tbody>
         @foreach($closings as $closing)
             <tr>
                 <td>{{ $closing->date->format('d.m.Y') }}</td>
                 <td>{{ number_format($closing->total_sales, 0, '.', ' ') }}</td>
+                <td>{{ number_format($closing->total_returns, 0, '.', ' ') }}</td>
                 <td>{{ number_format($closing->total_cost, 0, '.', ' ') }}</td>
-                <td>{{ number_format($closing->total_profit, 0, '.', ' ') }}</td>
+                <td class="{{ $closing->total_profit < 0 ? 'text-danger fw-bold' : 'text-success fw-bold' }}">
+                    {{ number_format($closing->total_profit, 0, '.', ' ') }}
+                </td>
             </tr>
         @endforeach
         </tbody>
